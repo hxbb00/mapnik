@@ -1,12 +1,7 @@
 name: Release Linux
 
 on:
-  push:
-    branches:
-      - "*"
-  pull_request:
-    branches-ignore:
-      - "no-ci-*"
+    workflow_dispatch:
 env:
   PRESET: linux-ci-release
 
