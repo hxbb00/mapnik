@@ -105,9 +105,10 @@ jobs:
           cmake-preset: ${{ env.PRESET }}
 
       - name: Show the artifacts
+        shell: bash
         run: |
           pwd
-          ls -al "${PWD}/build"
+          ls -R "${PWD}/build"
 
       - name: upload out artifacts
         uses: actions/upload-artifact@v4
