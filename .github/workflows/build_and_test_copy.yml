@@ -46,12 +46,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
-      - name: Get Time
-        id: jobtime
-        uses: nanzm/get-time-action@master
-        with:
-          timeZone: UTC+8
-          format: 'YYYYMMDD-HHmmss'
+      - name: Set UUID
+        id: generate-uuid
+        uses: filipstefansson/uuid-action@v1
+
+      # use the output from the `generate-uuid` step
+      - name: Get the UUID
+        run: echo "UUID is ${{ steps.generate-uuid.outputs.uuid }}"
 
       - name: "Install required system packages"
         shell: bash
@@ -61,6 +62,10 @@ jobs:
             echo "C:\Program Files\OpenCppCoverage" >> ${GITHUB_PATH}
           elif [ "$RUNNER_OS" == "Linux" ]; then
             sudo apt update
+            sudo rm -rf /usr/share/dotnet
+            sudo rm -rf /opt/ghc
+            sudo rm -rf "/usr/local/share/boost"
+            sudo rm -rf "$AGENT_TOOLSDIRECTORY"
             sudo apt install -y gperf libxxf86vm-dev ninja-build postgresql-client lcov autoconf-archive
           else
             brew install automake ninja lcov autoconf-archive
@@ -124,7 +129,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         env:
-          JOBTIME: "${{ steps.jobtime.outputs.time }}"
+          JOBTIME: "${{ steps.generate-uuid.outputs.uuid }}"
         with:
           name: intermediate-out-${{ runner.os }}-${{ env.JOBTIME }}
           path: mapnik_win_out.zip
@@ -133,7 +138,7 @@ jobs:
         uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
         env:
-          JOBTIME: "${{ steps.jobtime.outputs.time }}"
+          JOBTIME: "${{ steps.generate-uuid.outputs.uuid }}"
         with:
           name: intermediate-vcpkg-installed-${{ runner.os }}-${{ env.JOBTIME }}
           path: mapnik_win_vcpkg.zip
