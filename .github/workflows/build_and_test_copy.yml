@@ -46,6 +46,13 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Get Time
+        id: jobtime
+        uses: nanzm/get-time-action@master
+        with:
+          timeZone: UTC+8
+          format: 'YYYYMMDD-HHmmss'
+
       - name: "Install required system packages"
         shell: bash
         run: |
@@ -98,30 +105,35 @@ jobs:
 
       - name: Build
         run: cmake --build --preset ${{ env.PRESET }}
+        env:
+          TMPDIR: ${{ runner.temp }}
 
       - name: Run Tests
         uses: ./.github/actions/run_tests
         with:
           cmake-preset: ${{ env.PRESET }}
 
-      - name: Show the artifacts
-        shell: bash
+      - name: pack files
+        shell: cmd
+        if: runner.os == 'Windows'
         run: |
-          pwd
-          ls -R "${PWD}/build"
+          7z a mapnik_win_out.zip ./build/out
+          7z a mapnik_win_vcpkg.zip ./build/vcpkg_installed
 
       - name: upload out artifacts
         uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
+        env:
+          JOBTIME: "${{ steps.jobtime.outputs.time }}"
         with:
-          name: intermediate-out
-          path: |
-            build/out
+          name: intermediate-out-${{ runner.os }}-${{ env.JOBTIME }}
+          path: mapnik_win_out.zip
 
       - name: upload vcpkg_installed artifacts
         uses: actions/upload-artifact@v4
         if: runner.os == 'Windows'
+        env:
+          JOBTIME: "${{ steps.jobtime.outputs.time }}"
         with:
-          name: intermediate-vcpkg-installed
-          path: |
-            build/vcpkg_installed
+          name: intermediate-vcpkg-installed-${{ runner.os }}-${{ env.JOBTIME }}
+          path: mapnik_win_vcpkg.zip
