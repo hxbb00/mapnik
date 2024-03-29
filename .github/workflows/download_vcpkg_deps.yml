@@ -28,7 +28,6 @@ jobs:
       fail-fast: false
       matrix:
         os: [windows-latest]
-        mono: [mono]
 
     runs-on: ${{ matrix.os }}
 
@@ -73,7 +72,6 @@ jobs:
           nuget-source: https://nuget.pkg.github.com/mapnik/index.json
           nuget-username: ${{ github.actor }}
           nuget-pat: ${{ secrets.GITHUB_TOKEN }}
-          mono: ${{ matrix.mono }}
 
       - id: lc_platform
         uses: ASzc/change-string-case-action@v5
